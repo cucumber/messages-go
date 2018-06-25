@@ -1,24 +1,24 @@
 SHELL := /usr/bin/env bash
-PROTO_FILES = $(shell find . -name "*.proto")
-PROTO_CLASSES = $(patsubst %.proto,%_pb.go,$(PROTO_FILES))
 export GOPATH = $(realpath ./lib)
 
 default: test
 .PHONY: default
 
-test: lib/src/github.com/stretchr/testify $(PROTO_CLASSES)
+test: lib/src/github.com/stretchr/testify messages_pb.go
 	go test
 .PHONY: clean
 
 lib/src/github.com/stretchr/testify:
+	mkdir -p lib
 	go get github.com/stretchr/testify
 
 lib/src/github.com/golang/protobuf/protoc-gen-go:
+	mkdir -p lib
 	go get github.com/golang/protobuf/protoc-gen-go
 
-%_pb.go: %.proto lib/src/github.com/golang/protobuf/protoc-gen-go
-	protoc --go_out=. $<
+messages_pb.go: messages.proto lib/src/github.com/golang/protobuf/protoc-gen-go
+	PATH="${GOPATH}/bin:${PATH}" protoc --go_out=. $<
 
 clean:
-	rm -rf lib/src lib/pkg
+	rm -rf lib messages_pb.go
 .PHONY: clean
